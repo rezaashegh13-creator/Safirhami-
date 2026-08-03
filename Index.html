@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>سفیر سلامت ۴۰ روزه</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #16213e;
+            border-radius: 15px;
+            border-bottom: 3px solid #f1c40f;
+        }
+        .header h1 { color: #f1c40f; font-size: 22px; }
+        .header h2 { color: #fff; font-size: 16px; margin-top: 5px; }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            background: #2980b9;
+            color: white;
+            width: 100%;
+        }
+        .btn-green { background: #27ae60; }
+        .btn-red { background: #e74c3c; }
+        .btn-orange { background: #f39c12; color: #1a1a2e; }
+        .btn-purple { background: #8e44ad; }
+        .settings-panel {
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .settings-row label { font-size: 13px; color: #ecf0f1; min-width: 65px; }
+        .settings-row input[type="time"] {
+            background: #1a1a2e;
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+            padding: 8px;
+            border-radius: 5px;
+            width: 80px;
+        }
+        .settings-row input[type="text"], .settings-row select {
+            background: #1a1a2e;
+            color: white;
+            border: 1px solid #7f8c8d;
+            padding: 8px;
+            border-radius: 5px;
+            flex-grow: 1;
+            min-width: 100px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #16213e;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        th { padding: 10px; background: #2c3e50; color: white; text-align: center; font-size: 13px; }
+        td { padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
+        .today-row { border: 3px solid #f1c40f !important; background: rgba(241,196,15,0.2) !important; font-weight: bold; }
+        .status-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .status-text { font-size: 16px; font-weight: bold; color: #f1c40f; min-height: 25px; }
+        .log-box {
+            background: #16213e;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 9px;
+            max-height: 80px;
+            overflow-y: auto;
+            text-align: left;
+            direction: ltr;
+            margin-top: 8px;
+            font-family: monospace;
+        }
+        .footer-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26,26,46,0.95);
+            border-top: 2px solid #f1c40f;
+            padding: 10px;
+            z-index: 999;
+            display: flex;
+            gap: 8px;
+        }
+        .footer-container a {
+            background: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        /* آلارم */
+        .alarm-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 99999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .alarm-overlay.show { display: flex; }
+        .alarm-stop-btn {
+            background: #e74c3c;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            padding: 25px 60px;
+            border: 4px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            animation: pulse 0.5s infinite;
+            margin: 5px;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); background: #c0392b; }
+        }
+        .alarm-snooze-btn {
+            background: #f39c12;
+            color: white;
+            font-size: 18px;
+            padding: 15px 35px;
+            border: 2px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .alarm-message {
+            color: #f1c40f;
+            font-size: 26px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="alarm-overlay" id="alarmOverlay">
+    <div class="alarm-message" id="alarmMessage">⏰ وقت دارو</div>
+    <button class="alarm-stop-btn" onclick="stopAlarm()">🔇 قطع آلارم</button>
+    <button class="alarm-snooze-btn" onclick="snoozeAlarm()">💤 چرت ۱۰ دقیقه</button>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>🌿 سفیر سلامت حمیدیان</h1>
+        <h2>🍽️ برنامه ۴۰ روزه</h2>
+    </div>
+
+    <button class="btn" onclick="toggleSettings()">⚙️ تنظیمات</button>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div style="background:#34495e; padding:10px; border-radius:5px; margin-bottom:10px;">
+            <p style="color:#f1c40f; font-size:14px; margin-bottom:8px;">🎨 نمایش</p>
+            <select id="viewMode" style="width:100%; padding:8px; background:#1a1a2e; color:white; border:1px solid #7f8c8d; border-radius:5px;">
+                <option value="all">کل ۴۰ روز</option>
+                <option value="week">یک هفته</option>
+                <option value="today">فقط امروز</option>
+            </select>
+        </div>
+        <div style="background:#34495e; padding:10px; border-radius:5px; margin-bottom:10px;">
+            <p style="color:#f1c40f; font-size:14px; margin-bottom:8px;">🔔 آهنگ زنگ</p>
+            <input type="file" id="customAlarmFile" accept="audio/*" style="display:none;">
+            <button class="btn btn-purple" onclick="document.getElementById('customAlarmFile').click()">📁 انتخاب آهنگ</button>
+            <div id="audioStatus" style="font-size:11px; color:#aaa; text-align:center; margin:5px 0;">پیش‌فرض: بیپ</div>
+            <button class="btn btn-red" onclick="testAlarm()">🔊 تست آلارم</button>
+        </div>
+        <div style="background:#34495e; padding:10px; border-radius:5px; margin-bottom:10px;">
+            <p style="color:#f1c40f; font-size:14px; margin-bottom:8px;">⏰ زمان‌ها</p>
+            <div class="settings-row"><label>ناشتا</label><input type="text" id="nameOil" value="روغن بادام شیرین"><input type="time" id="timeOil" value="06:00"></div>
+            <div class="settings-row"><label>صبحانه</label><input type="text" id="nameBreakfast" value="دمنوش کاسنی"><input type="time" id="timeBreakfast" value="08:00"></div>
+            <div class="settings-row"><label>عصرانه</label><input type="text" id="nameEvening" value="چای آناناس"><input type="time" id="timeEvening" value="17:00"></div>
+            <div class="settings-row"><label>شام</label><input type="text" id="nameDinner" value="دمنوش گیاه ۵"><input type="time" id="timeDinner" value="21:00"></div>
+            <div class="settings-row"><label>روز</label><select id="daySelector"></select></div>
+        </div>
+        <button class="btn btn-orange" onclick="saveAllSettings()">💾 ذخیره</button>
+    </div>
+
+    <button class="btn btn-green" onclick="startAlarms()">🔔 فعال‌سازی آلارم</button>
+
+    <table id="dietTable">
+        <thead><tr><th>روز</th><th>☀️ صبح</th><th>🌅 عصر</th><th>🌙 شب</th><th>💧 ناشتا</th></tr></thead>
+        <tbody id="scheduleBody"></tbody>
+    </table>
+
+    <div class="status-box">
+        <div class="status-text" id="statusText">⏳ آماده</div>
+        <div style="font-size:12px; color:#aaa; margin:8px 0;">ساعت: <span id="clockDisplay">--:--:--</span></div>
+        <div class="log-box" id="logBox">🚀</div>
+    </div>
+</div>
+
+<div class="footer-container">
+    <a href="https://eitaa.com/joinchat/878706709C93902231a1" target="_blank">🚀 کانال</a>
+    <a href="https://rubika.ir/page/Mhamidian313" target="_blank">📞 تماس</a>
+</div>
+
+<script>
+// ============ متغیرها ============
+let CT = { oil: "06:00", breakfast: "08:00", evening: "17:00", dinner: "21:00" };
+let CN = { oil: "روغن بادام شیرین", breakfast: "دمنوش کاسنی", evening: "چای آناناس", dinner: "دمنوش گیاه ۵" };
+let CD = 1, VM = "all";
+let audio = null, ctx = null, osc = null, gain = null;
+let playing = false, snoozeEnd = null, stoppedToday = {}, interval = null;
+
+// ============ لاگ ============
+function log(m) {
+    const b = document.getElementById('logBox');
+    const t = new Date().toLocaleTimeString('fa-IR');
+    b.innerHTML = `[${t}] ${m}<br>` + b.innerHTML;
+}
+
+// ============ صدا ============
+function playSound() {
+    stopSound();
+    if (audio) {
+        audio.currentTime = 0;
+        audio.loop = true;
+        audio.volume = 1;
+        audio.play().catch(() => beep());
+        return;
+    }
+    beep();
+}
+
+function beep() {
+    try {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        const n = ctx.currentTime;
+        gain.gain.setValueAtTime(0, n);
+        for (let i = 0; i < 200; i++) {
+            const t = n + (i * 1.2);
+            gain.gain.setValueAtTime(0.5, t);
+            gain.gain.setValueAtTime(0, t + 0.3);
+            osc.frequency.setValueAtTime(660, t);
+            osc.frequency.setValueAtTime(880, t + 0.15);
+        }
+        osc.start();
+    } catch(e) {}
+}
+
+function stopSound() {
+    if (audio) { audio.pause(); audio.currentTime = 0; }
+    if (osc) { try { osc.stop(); } catch(e) {} osc = null; }
+    if (ctx) { try { ctx.close(); } catch(e) {} ctx = null; }
+    gain = null;
+}
+
+// ============ آلارم ============
+function alarm(k, n, t, m) {
+    if (playing) return;
+    if (snoozeEnd && Date.now() < snoozeEnd) return;
+    if (stoppedToday[k]) return;
+
+    playing = true;
+    document.getElementById('alarmMessage').textContent = m;
+    document.getElementById('alarmOverlay').classList.add('show');
+    document.getElementById('statusText').textContent = m;
+
+    playSound();
+    if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+
+    try {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance('وقت ' + n + ' است');
+        u.lang = 'fa-IR'; u.rate = 0.85;
+        setTimeout(() => speechSynthesis.speak(u), 500);
+    } catch(e) {}
+
+    // نوتیفیکیشن
+    try {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('🌿 سفیر سلامت', {
+                body: m,
+                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">🌿</text></svg>',
+                vibrate: [500, 200, 500],
+                tag: 'alm-' + k,
+                requireInteraction: true
+            });
+        }
+    } catch(e) {}
+
+    log('🔔 ' + m);
+}
+
+function stopAlarm() {
+    playing = false;
+    stopSound();
+    document.getElementById('alarmOverlay').classList.remove('show');
+    document.getElementById('statusText').textContent = '⏳ منتظر...';
+    if (navigator.vibrate) navigator.vibrate(0);
+
+    const now = new Date();
+    const ct = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+    const alarms = [
+        { t: CT.oil, k: 'oil' },
+        { t: CT.breakfast, k: 'breakfast' },
+        { t: CT.evening, k: 'evening' },
+        { t: CT.dinner, k: 'dinner' }
+    ];
+    for (const a of alarms) {
+        if (ct === a.t) {
+            stoppedToday[a.k] = true;
+            localStorage.setItem('stopped', JSON.stringify(stoppedToday));
+            break;
+        }
+    }
+    log('🔇 قطع');
+}
+
+function snoozeAlarm() {
+    playing = false;
+    stopSound();
+    document.getElementById('alarmOverlay').classList.remove('show');
+    document.getElementById('statusText').textContent = '💤 چرت ۱۰ دقیقه';
+    if (navigator.vibrate) navigator.vibrate(0);
+    snoozeEnd = Date.now() + 600000;
+    log('💤 چرت');
+}
+
+function testAlarm() {
+    playing = true;
+    document.getElementById('alarmOverlay').classList.add('show');
+    document.getElementById('alarmMessage').textContent = '🔊 تست';
+    playSound();
+    setTimeout(() => { stopAlarm(); log('پایان تست'); }, 4000);
+}
+
+// ============ چک زمان ============
+function check() {
+    const today = new Date().toDateString();
+    if (localStorage.getItem('day') !== today) {
+        stoppedToday = {};
+        localStorage.setItem('day', today);
+        localStorage.removeItem('stopped');
+    }
+
+    if (playing) return;
+    if (snoozeEnd && Date.now() < snoozeEnd) return;
+
+    const now = new Date();
+    const ct = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+    const alarms = [
+        { t: CT.oil, n: CN.oil, tp: 'ناشتا', k: 'oil' },
+        { t: CT.breakfast, n: CN.breakfast, tp: 'صبحانه', k: 'breakfast' },
+        { t: CT.evening, n: CN.evening, tp: 'عصرانه', k: 'evening' },
+        { t: CT.dinner, n: CN.dinner, tp: 'شام', k: 'dinner' }
+    ];
+
+    for (const a of alarms) {
+        if (ct === a.t && !stoppedToday[a.k]) {
+            alarm(a.k, a.n, a.tp, '⏰ وقت ' + a.n + ' (' + a.tp + ')');
+            break;
+        }
+    }
+}
+
+function clock() {
+    const n = new Date();
+    document.getElementById('clockDisplay').textContent =
+        n.getHours().toString().padStart(2, '0') + ':' +
+        n.getMinutes().toString().padStart(2, '0') + ':' +
+        n.getSeconds().toString().padStart(2, '0');
+}
+
+// ============ فعال‌سازی ============
+function startAlarms() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(p => {
+            if (p === 'granted') log('✅ مجوز داده شد');
+            else log('⚠️ بدون مجوز - فقط صدا');
+        });
+    }
+
+    if (interval) clearInterval(interval);
+    interval = setInterval(check, 3000);
+    check();
+    document.getElementById('statusText').textContent = '✅ فعال - چک هر ۳ ثانیه';
+    log('✅ شروع');
+}
+
+// ============ فایل صوتی ============
+document.getElementById('customAlarmFile').addEventListener('change', function(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    stopSound();
+    const u = URL.createObjectURL(f);
+    audio = new Audio(u);
+    audio.loop = true;
+    audio.volume = 1;
+    const r = new FileReader();
+    r.onload = ev => { try { localStorage.setItem('audio', ev.target.result); } catch(ex) {} };
+    r.readAsDataURL(f);
+    document.getElementById('audioStatus').textContent = '✅ ' + f.name;
+});
+
+// ============ جدول ============
+function popDays() {
+    const s = document.getElementById('daySelector');
+    s.innerHTML = '';
+    for (let i = 1; i <= 40; i++) {
+        const o = document.createElement('option');
+        o.value = i; o.text = 'روز ' + i;
+        if (i === CD) o.selected = true;
+        s.appendChild(o);
+    }
+}
+
+function render() {
+    const tb = document.getElementById('scheduleBody');
+    tb.innerHTML = '';
+    let sd = 1, ed = 40;
+    if (VM === 'today') { sd = CD; ed = CD; }
+    else if (VM === 'week') { sd = CD; ed = Math.min(CD + 6, 40); }
+
+    for (let i = sd; i <= ed; i++) {
+        const odd = i % 2 !== 0;
+        const tr = document.createElement('tr');
+        if (i === CD) tr.className = 'today-row';
+        tr.innerHTML = `
+            <td style="background:#0f3460;font-weight:bold;">روز ${i}</td>
+            <td>${odd ? CN.breakfast : 'چای سیاه + وانیل'}</td>
+            <td>${CN.evening}</td>
+            <td>${odd ? CN.dinner : 'شربت شلیل/گل‌گاوزبان'}</td>
+            <td>${CN.oil}</td>`;
+        tb.appendChild(tr);
+    }
+}
+
+function toggleSettings() {
+    document.getElementById('settingsPanel').style.display =
+        document.getElementById('settingsPanel').style.display === 'block' ? 'none' : 'block';
+}
+
+function saveAllSettings() {
+    CN.oil = document.getElementById('nameOil').value;
+    CN.breakfast = document.getElementById('nameBreakfast').value;
+    CN.evening = document.getElementById('nameEvening').value;
+    CN.dinner = document.getElementById('nameDinner').value;
+    CT.oil = document.getElementById('timeOil').value;
+    CT.breakfast = document.getElementById('timeBreakfast').value;
+    CT.evening = document.getElementById('timeEvening').value;
+    CT.dinner = document.getElementById('timeDinner').value;
+    VM = document.getElementById('viewMode').value;
+    CD = parseInt(document.getElementById('daySelector').value);
+
+    localStorage.setItem('diet', JSON.stringify({ n: CN, t: CT, d: CD, m: VM }));
+    render();
+    log('⚙️ ذخیره شد');
+    alert('✅ ذخیره شد');
+}
+
+// ============ شروع ============
+window.onload = () => {
+    // روز جدید
+    const today = new Date().toDateString();
+    if (localStorage.getItem('day') !== today) {
+        stoppedToday = {};
+        localStorage.setItem('day', today);
+        localStorage.removeItem('stopped');
+    } else {
+        const s = localStorage.getItem('stopped');
+        if (s) try { stoppedToday = JSON.parse(s); } catch(e) { stoppedToday = {}; }
+    }
+
+    // آهنگ
+    const sa = localStorage.getItem('audio');
+    if (sa) { audio = new Audio(sa); audio.loop = true; audio.volume = 1; }
+
+    // تنظیمات
+    const sd = localStorage.getItem('diet');
+    if (sd) {
+        try {
+            const d = JSON.parse(sd);
+            if (d.n) CN = d.n;
+            if (d.t) CT = d.t;
+            if (d.d) CD = d.d;
+            if (d.m) VM = d.m;
+            document.getElementById('nameOil').value = CN.oil;
+            document.getElementById('nameBreakfast').value = CN.breakfast;
+            document.getElementById('nameEvening').value = CN.evening;
+            document.getElementById('nameDinner').value = CN.dinner;
+            document.getElementById('timeOil').value = CT.oil;
+            document.getElementById('timeBreakfast').value = CT.breakfast;
+            document.getElementById('timeEvening').value = CT.evening;
+            document.getElementById('timeDinner').value = CT.dinner;
+            document.getElementById('viewMode').value = VM;
+        } catch(e) {}
+    }
+
+    popDays();
+    render();
+    clock();
+    setInterval(clock, 1000);
+
+    // شروع خودکار
+    if (interval) clearInterval(interval);
+    interval = setInterval(check, 3000);
+    check();
+    document.getElementById('statusText').textContent = '✅ فعال - چک هر ۳ ثانیه';
+
+    // درخواست مجوز
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+};
+</script>
+</body>
+      </html>
